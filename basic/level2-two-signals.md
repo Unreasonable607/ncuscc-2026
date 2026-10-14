@@ -1,90 +1,55 @@
-# 第 2 关：两段信号
+# 第 2 关 两段信号
 
-## 任务
+这关比第一关麻烦，文件多，还分布在不同的目录里。
 
-一批材料中夹杂无关文件，需要找出两段有效信号并生成一份完整结果。
+先找文件：
 
-- 两份输入由文件名中的 `signal-A`、`signal-B` 标识
-- 密钥来自清单中唯一的 `ACCESS_KEY=` 记录
-- 处理程序为 `/workspace/exam`
-- 最终结果须保持 **A 段在前、B 段在后**
+    find /workspace -type f
 
-通关条件：`/workspace/flag` 的字节内容严格等于 A 段处理结果与 B 段处理结果的有序拼接。
+    /workspace/inbox/signal-B.bin
+    /workspace/exam
+    /workspace/archive/2026/signal-A.bin
+    /workspace/archive/2026/notes-A.txt
+    /workspace/catalog/words.txt
 
-## 解题过程
+A 和 B 在不同的地方，一个在 inbox，一个埋在 archive/2026 下面。
 
-### 1. 递归查找所有文件
+找密钥：
 
-```bash
-find /workspace -type f
-```
+    grep -r "ACCESS_KEY=" /workspace
 
-结果：
+    /workspace/catalog/words.txt:ACCESS_KEY=STAR
 
-```
-/workspace/inbox/signal-B.bin
-/workspace/exam
-/workspace/archive/2026/signal-A.bin
-/workspace/archive/2026/notes-A.txt
-/workspace/catalog/words.txt
-```
+这里有个坑，密钥是 STAR，不是整行 ACCESS_KEY=STAR。这个提示里写了，我自己多半会填错。
 
-两个信号文件在不同的目录层级里。
+然后要分别处理 A 和 B。麻烦的地方是：程序永远只写 /workspace/output 这个位置，处理 B 的时候会把 A 的结果盖掉。
 
-### 2. 找出密钥
+所以先处理 A：
 
-```bash
-grep -r "ACCESS_KEY=" /workspace
-```
+    cp /workspace/archive/2026/signal-A.bin /workspace/input
+    /workspace/exam -e STAR
+    cp /workspace/output /workspace/partA
 
-输出：
+第三步是关键的，先把 A 的结果另存成 partA。
 
-```
-/workspace/catalog/words.txt:ACCESS_KEY=STAR
-```
+再处理 B：
 
-注意：`-e` 参数需要的是 `STAR`，不是整行 `ACCESS_KEY=STAR`。
+    cp /workspace/inbox/signal-B.bin /workspace/input
+    /workspace/exam -e STAR
+    cp /workspace/output /workspace/partB
 
-### 3. 处理 A 段
+最后拼起来，A 在前 B 在后：
 
-```bash
-cp /workspace/archive/2026/signal-A.bin /workspace/input
-/workspace/exam -e STAR
-cp /workspace/output /workspace/partA
-```
+    cat /workspace/partA /workspace/partB > /workspace/flag
 
-最后一步是关键：程序永远只写 `/workspace/output`，处理 B 时会把它覆盖，所以必须先把 A 的结果另存。
+验证：
 
-### 4. 处理 B 段
+    wc -c /workspace/flag
 
-```bash
-cp /workspace/inbox/signal-B.bin /workspace/input
-/workspace/exam -e STAR
-cp /workspace/output /workspace/partB
-```
+    32 /workspace/flag
 
-### 5. 按顺序拼接
+A 是 16 字节，B 是 16 字节，加起来 32，对上了。
 
-```bash
-cat /workspace/partA /workspace/partB > /workspace/flag
-```
+中间有一步我先点了提交，平台提示"缺少规定的提交文件"。当时有点慌，后来才明白 flag 是最后才生成的，中途点当然说没有。
 
-`cat` 后跟多个文件时按顺序连接输出；`>` 一次性写出，避免了覆盖问题。
-
-### 6. 验证
-
-```bash
-wc -c /workspace/flag
-```
-
-结果 32 字节 = A 段 16 字节 + B 段 16 字节。
-
-## 小结
-
-三个提示分别对应三个坑：
-
-| 提示 | 对应操作 |
-|---|---|
-| 目录可能嵌套多层 | `find` 递归查找 + 管道筛选 |
-| 清单含干扰记录，整行不都是密钥 | `grep` 定位后再取出密钥部分 |
-| 覆盖 vs 追加、输出位置固定 | 先另存 A 的结果，最后用 `cat` 有序拼接 |
+另外这关我重来过一次，之前那次做到一半工作区被重建了。

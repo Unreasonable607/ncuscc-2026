@@ -1,75 +1,41 @@
-# 第 1 关：找到入口
+# 第 1 关 找到入口
 
-## 任务
+在平台的网页终端里做的，不是我自己电脑上的 Ubuntu。
 
-在一个离线 Linux 工作区中，为一份待处理材料生成结果文件 `/workspace/flag`。
+先翻工作区：
 
-- 材料位于 `/workspace/`，包括输入文件和密钥文本
-- 处理程序为 `/workspace/exam`，接口以程序帮助信息为准
-- 通关条件：`/workspace/flag` 必须是普通文件（≤ 1 MiB），内容与处理结果逐字节相同
+    ls -la /workspace
 
-## 解题过程
+出来四个东西：
 
-### 1. 查看工作区内容
+    cabinet/   exam   input.bin   logs/
 
-```bash
-ls -la /workspace
-```
+`exam` 的权限是 `-rwxr-xr-x`，有 x，能跑。前几天刚学的权限，这里派上用场了。
 
-看到：
+不知道怎么用，就敲了 --help：
 
-```
-drwxr-xr-x cabinet
--rwxr-xr-x exam
--rw-r--r-- input.bin
-drwxr-xr-x logs
-```
+    用法：exam [-h] -e 密钥
+    使用密钥处理 /workspace/input，将结果写入 /workspace/output
 
-### 2. 查看程序用法
+到这里我不太懂：程序要读 /workspace/input，可我看到的是 input.bin，多个后缀。当时没反应过来这是什么意思，是问了才知道——**要在同目录下自己造一个叫 input 的文件**。
 
-```bash
-/workspace/exam --help
-```
+    cp /workspace/input.bin /workspace/input
 
-输出说明：程序读取 `/workspace/input`，将结果写入 `/workspace/output`。
+密钥在 cabinet 里：
 
-### 3. 关键发现：名字对不上
+    cat /workspace/cabinet/key.txt
 
-程序要读的是 `input`，但实际文件名是 **`input.bin`** —— 多了一个后缀。
+出来是 MOON。logs 目录是空的，估计是干扰项。
 
-### 4. 制造程序需要的文件名
+然后跑程序：
 
-```bash
-cp /workspace/input.bin /workspace/input
-```
+    /workspace/exam -e MOON
+    echo $?
 
-### 5. 在子目录里找到密钥
+`echo $?` 是看上一条命令的退出码。敲完 exam 屏幕上什么都没有，我还以为没跑成功，结果是退出码没有报错，是 0。后来才知道 Linux 里很多程序成功的时候就是不吭声。
 
-```bash
-ls -la /workspace/cabinet /workspace/logs
-cat /workspace/cabinet/key.txt
-```
+程序产出的文件叫 output，但要求交的是 flag，名字又不一样：
 
-`logs/` 是空目录（干扰项），密钥在 `cabinet/key.txt` 中。
+    cp /workspace/output /workspace/flag
 
-### 6. 运行处理程序
-
-```bash
-/workspace/exam -e <密钥>
-echo $?          # 退出码 0 表示成功
-```
-
-### 7. 把产出复制成要求提交的文件
-
-程序的产出叫 `output`，但通关要求的是 `flag`：
-
-```bash
-cp /workspace/output /workspace/flag
-```
-
-## 小结
-
-这一关的两个考点：
-
-1. **发现名字不匹配**，并主动建立正确的文件名
-2. **区分「程序产出的文件」和「要求提交的文件」**，用 `cp` 保持二进制内容不变
+这一关做下来，两次"名字不一样"（input.bin vs input，output vs flag）都是我自己没看出来的，是有人指了才知道。
