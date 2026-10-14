@@ -50,3 +50,12 @@ diff 没有输出，说明一模一样。02 和 03 也跑了，都通过。
 ## 记一个新符号
 
 `./main < samples/01-mixed.in` 里的 `<` 是输入重定向，把文件的内容当成程序的输入喂进去。之前学的 `>` 是把输出写进文件，`<` 正好反过来。
+
+## 补充
+
+02 和 03 两个样例也跑了：
+
+    diff <(./main < samples/02-single.in) samples/02-single.out
+    diff <(./main < samples/03-alternating.in) samples/03-alternating.out
+
+两个都没有输出，也就是全部通过。

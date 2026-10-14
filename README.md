@@ -8,12 +8,13 @@
 
 | 目录 | 内容 |
 |---|---|
-| `basic/` | 基础关卡（Linux 与 Git）的解题记录 |
-| `notes/` | 学习过程中的笔记与环境搭建记录 |
+| `basic/` | 基础关卡（Linux、Git、编程题）的解题记录 |
+| `code/` | 各关卡写过的代码 |
+| `notes/` | 环境搭建记录、待理解清单 |
 | `report/` | 考核报告（技术报告 + 感悟报告） |
 
 ## 环境
 
 - Windows 11 + WSL2
 - Ubuntu 22.04.5 LTS
-- 平台：NCUSCC 自研考核平台（recruitment.ncuscc.club）
+- 考核平台：recruitment.ncuscc.club
